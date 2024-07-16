@@ -13,10 +13,8 @@ import { useSyncExternalStore } from 'react';
 var GlobalState = /** @class */ (function () {
     function GlobalState(initialState) {
         this.listeners = new Set();
-        this.history = [];
-        this.future = [];
         this.state = initialState;
-        this.history.push(initialState);
+        this.previousState = initialState;
     }
     GlobalState.prototype.notify = function () {
         var _this = this;
@@ -37,28 +35,22 @@ var GlobalState = /** @class */ (function () {
         var nextState = typeof partial === 'function' ? partial(this.state) : partial;
         if (nextState !== this.state) {
             this.state = __assign(__assign({}, this.state), nextState);
-            this.history.push(this.state);
-            this.future = [];
+            this.previousState = this.state;
             this.notify();
         }
     };
     GlobalState.prototype.undo = function () {
-        if (this.history.length > 1) {
-            this.future.push(this.history.pop());
-            this.state = this.history[this.history.length - 1];
-            this.notify();
-        }
+        this.state = this.previousState;
+        this.notify();
     };
     GlobalState.prototype.redo = function () {
-        if (this.future.length > 0) {
-            this.history.push(this.future.pop());
-            this.state = this.history[this.history.length - 1];
-            this.notify();
-        }
+        // For redo functionality, you would typically need to implement a mechanism to store future states
+        // However, since we're simplifying to only maintain previousState, redo might not be directly supported
+        // without additional complexity.
     };
     return GlobalState;
 }());
-function createGlobalStateWithSelector(creator) {
+function initState(creator) {
     var globalState = new GlobalState(creator(function (partial) { return globalState.setState(partial); }, function () { return globalState.getState(); }));
     function useGlobalState(selector, equalityFn) {
         if (equalityFn === void 0) { equalityFn = Object.is; }
@@ -76,7 +68,7 @@ function createGlobalStateWithSelector(creator) {
         return useSyncExternalStore(subscribe, getState);
     }
     useGlobalState.useUndo = function () { return function () { return globalState.undo(); }; };
-    useGlobalState.useRedo = function () { return function () { return globalState.redo(); }; };
+    // Redo functionality would need to be re-implemented if required
     return useGlobalState;
 }
-export default createGlobalStateWithSelector;
+export default initState;

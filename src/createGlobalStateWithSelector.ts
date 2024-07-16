@@ -5,12 +5,11 @@ type StateCreator<T> = (set: (partial: Partial<T> | ((state: T) => Partial<T>)) 
 class GlobalState<T> {
     private state: T;
     private listeners: Set<(state: T) => void> = new Set();
-    private history: T[] = [];
-    private future: T[] = [];
+    private previousState: T;
 
     constructor(initialState: T) {
         this.state = initialState;
-        this.history.push(initialState);
+        this.previousState = initialState;
     }
 
     private notify() {
@@ -34,30 +33,24 @@ class GlobalState<T> {
         const nextState = typeof partial === 'function' ? partial(this.state) : partial;
         if (nextState !== this.state) {
             this.state = { ...this.state, ...nextState };
-            this.history.push(this.state);
-            this.future = [];
+            this.previousState = this.state;
             this.notify();
         }
     }
 
     undo() {
-        if (this.history.length > 1) {
-            this.future.push(this.history.pop()!);
-            this.state = this.history[this.history.length - 1];
-            this.notify();
-        }
+        this.state = this.previousState;
+        this.notify();
     }
 
     redo() {
-        if (this.future.length > 0) {
-            this.history.push(this.future.pop()!);
-            this.state = this.history[this.history.length - 1];
-            this.notify();
-        }
+        // For redo functionality, you would typically need to implement a mechanism to store future states
+        // However, since we're simplifying to only maintain previousState, redo might not be directly supported
+        // without additional complexity.
     }
 }
 
-function createGlobalStateWithSelector<T>(creator: StateCreator<T>) {
+function initState<T>(creator: StateCreator<T>) {
     const globalState: GlobalState<T> = new GlobalState<T>(creator(
         (partial) => globalState.setState(partial),
         () => globalState.getState()
@@ -80,9 +73,9 @@ function createGlobalStateWithSelector<T>(creator: StateCreator<T>) {
     }
 
     useGlobalState.useUndo = () => () => globalState.undo();
-    useGlobalState.useRedo = () => () => globalState.redo();
+    // Redo functionality would need to be re-implemented if required
 
     return useGlobalState;
 }
 
-export default createGlobalStateWithSelector;
+export default initState;
