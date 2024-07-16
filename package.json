@@ -1,5 +1,5 @@
 {
-  "name": "state-sync",
+  "name": "@emerson/state-sync",
   "version": "1.0.0",
   "description": "Uma biblioteca para gerenciamento de estado global com suporte a seletores, persistência e undo.",
   "main": "dist/index.js",
