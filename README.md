@@ -5,7 +5,7 @@ Uma biblioteca para gerenciamento de estado global que usa seletores para evitar
 ## Instalação
 1. Instale o pacote via npm:
    ```sh
-   npm install state-sync
+   npm i @emerson_/state-sync
     ```
 
 ## Exemplo básico de uso
