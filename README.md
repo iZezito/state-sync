@@ -11,7 +11,7 @@ Uma biblioteca para gerenciamento de estado global que usa seletores para evitar
 ## Exemplo básico de uso
 `@/stores/counterStore.ts`
 ```typescript
-import { initState } from 'state-sync';
+import { initState } from '@emerson_/state-sync';
 
 type StateProps = {
     counter: number;
